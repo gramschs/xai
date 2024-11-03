@@ -105,14 +105,14 @@ aushalten kann, basierend auf den Eingabemerkmalen Zellenform, Zellengröße und
 Füllgrad. Laut Dokumentation ist die Zellenform entweder `1` für eine X-Zelle
 oder `2` für einen Gyroiden. Was sich hinter diesen Fachbegriffen verbirgt,
 können nur die Ingenieure beantworten, die diesen Produktionsprozess entwickelt
-haben (siehe Abbildung {ref}`zellenform`).
+haben (siehe Abbildung 1).
 
 ```{figure} pics/zellenform.png
 :alt: Zellenform der Bauteile
 :align: center
 :name: zellenform
-Zellenform der Bauteile: links X-Zelle (codiert als 1) und rechts Gyroid (codiert als 2); 
-Quelle: Tim Schwitzner {cite}`schwitzner:2024`.
+Zellenform der Bauteile: links X-Zelle codiert als 1 und rechts Gyroid codiert als 2  
+(Quelle: Tim Schwitzner {cite}`schwitzner:2024`).
 ```
 
 Darüber hinaus muss die Zellengröße zwischen $\pu{2 mm}$ und $\pu{10 mm}$
@@ -190,7 +190,7 @@ Kehren wir zurück zu dem fiktiven Anwendungsbeispiel und stellen uns vor, die
 Entwickler des Schuheinlagen-Orakels haben das Unternehmen verlassen. Die
 Konstruktionsabteilung möchte nun verstehen, warum für ein 3D-gedrucktes Bauteil
 mit der Zellenform X-Zelle, einer Zellengröße von $\pu{3 mm}$ und einem Füllgrad
-von $\pu{30 %}$ eine maximale Kraft von $\pu{42.3 N}$ prognostiziert wird. Um
+von $\pu{30 \%}$ eine maximale Kraft von $\pu{42.3 N}$ prognostiziert wird. Um
 ein KI-Modell erklärbar zu machen, gibt es verschiedene Ansätze. Ein häufig
 verwendetes Verfahren ist **LIME**. LIME ist ein Akronym und steht für
 
@@ -204,21 +204,21 @@ für verschiedene KI-Modelle eingesetzt werden kann.
 
 ```{admonition} Wie funktioniert die LIME-Methode?
 :class: notes
-1. *Variation der Daten*: Für ein ausgewähltes Beispiel (hier das Bauteil)
-   erzeugen wir abgewandelte Varianten der Eingabedaten mit kleinen Änderungen
-   im Vergleich zum Referenzbeispiel.
+1. *Variation der Daten*: Für ein ausgewähltes Beispiel, die sogenannte
+   Referenz, erzeugen wir abgewandelte Varianten der Eingabedaten mit kleinen
+   Änderungen im Vergleich zum Referenzbeispiel.
 2. *Berechnung der Prognosen*: Für jede dieser leicht abgeänderten Eingabedaten
    berechnen wir mit dem ursprünglichen KI-Modell eine Prognose.
-3. *Gewichtung der Eingabedaten*: Die abgeänderten Eingabedaten werden gewichtet.
-   Je ähnlicher eine Datenpunkt zum ausgewählten Beispiel ist, desto höher ist das
+3. *Gewichtung der Eingabedaten*: Die abgeänderten Eingabedaten werden
+   gewichtet. Je ähnlicher eine Datenpunkt zur Referenz ist, desto höher ist das
    Gewicht.
 4. *Training eines Ersatzmodells*: Wir trainieren ein einfaches, gut
-   interpretierbares Ersatzmodell (z.B. ein linares Regressionsmodell) auf den
-   gewichteten, leicht abgeänderten Eingabedaten. Die Prognosen des
-   ursprünglichen Modells sind dabei die Ausgabedaten.
+   interpretierbares Ersatzmodell (z.B. ein linares Regressionsmodell oder einen
+   Entscheidungsbaum) auf den gewichteten, leicht abgeänderten Eingabedaten. Die
+   Prognosen des ursprünglichen Modells sind dabei die Ausgabedaten.
 5. *Erklärung der Prognose*: Da das Ersatzmodell aus Schritt 4 ein
-   White-Box-Modell ist, können wir es nun benutzen, um zu erklären, welche
-   Merkmale besonders die Prognose beeinflussen.
+   White-Box-Modell ist, können wir es nun benutzen, um das Black-Box-KI-Modell
+   lokal zu erklären.
 ```
 
 Obwohl für das LIME-Modell, das erstmals 2016 vorgestellt wurde
@@ -229,11 +229,12 @@ zu verstehen.
 
 ### Schritt 1: Variation der Daten
 
-Als erstes ändern wir die Merkmale des ausgewählten Beispiels leicht ab. Da es
-nur zwei mögliche Zellenformen gibt, können wir diese nicht "leicht" variieren.
-Daher belassen wir es bei der Zellenform `X-Zelle` und generieren eine Liste mit
-`N` Einsen. Etwas einfacher wird es, wenn wir dazu die Funktion `np.ones()` des
-Moduls `NumPy` nutzen, das wir mit der üblichen Abkürzung `np` importieren.
+Als erstes ändern wir die Merkmale des ausgewählten Referenzbeispiels leicht ab.
+Da es nur zwei mögliche Zellenformen gibt, können wir diese nicht "leicht"
+variieren. Daher belassen wir es bei der Zellenform `X-Zelle` und generieren
+eine Liste mit `N` Einsen. Etwas einfacher wird es, wenn wir dazu die Funktion
+`np.ones()` des Moduls `NumPy` nutzen, das wir mit der üblichen Abkürzung `np`
+importieren.
 
 ```{code-cell}
 import numpy as np
@@ -254,6 +255,27 @@ np.random.seed(42)
 
 variation_zellengroesse = 3.0 + np.random.normal(0, 0.1, N)
 variation_fuellgrad = 0.3 + np.random.normal(0, 0.1, N)
+```
+
+Wir überprüfen visuell mit einem Streudiagramm (Scatterplot), ob die variierten
+Eingabedaten im zulässigen Bereich liegen. Die Zellengröße muss ja zischen 2 und
+10 mm liegen, der Füllgrad im Intervall [0,1]. Dazu importieren wir das Modul
+`Plotly Express` als `px`. Der Scatterplot wird durch die Funktion `scatter()`
+erzeugt. Auf der x-Achse tragen wir mit `x=ariation_zellengroesse` die
+Zellengrößen ein und auf der y-Achse mit `y=variation_fuellgrad` die Füllgrade
+der variierten Bauteile. Zusätzlich setzen wir mi dem optionalen Argument
+`title=` noch einen Titel. Zuletzt ergänzen wir noch das Referenzbeispiel durch
+einen zweiten Scatterplot mit `add_scatter()`.
+
+```{code-cell}
+import plotly.express as px 
+
+fig = px.scatter(x=variation_zellengroesse, y=variation_fuellgrad,
+    title='Variierte Eingabedaten um ausgewähltes Referenzbeispiel (3, 0.3)'
+)
+fig.add_scatter(x=[3.0], y=[0.3], name='Referenz')
+
+fig.show()
 ```
 
 Auf diese Weise erhalten wir die variierten Eingabedaten, die wir anschließend
@@ -284,6 +306,17 @@ Gewicht soll dieser Datenpunkt beim Training des Ersatzmodells sein. In diesem
 Beispiel verwenden wir den euklidischen Abstand, um die Ähnlichkeit zu
 berechnen.
 
+```{figure} pics/variierte_eingabedaten_annotated.svg
+:alt: Euklidischer Abstand zur Referenz
+:align: center
+:name: variierte_eingabedaten_annotate
+Der euklidische Abstand $r$ zur Referenz kann mit dem Satz des Pythagoras 
+als $r=\sqrt{(\Delta x)^2 + (\Delta y)^2}$ berechnet werden.
+(Quelle: eigene Darstellung)
+```
+
+Damit ergibt sich der folgende Python-Code zur Berechnung der Abstände.
+
 ```{code-cell}
 abstaende = ((eingabedaten['Zellengroesse'] - 3.0)**2 + (eingabedaten['Fuellgrad'] - 0.3)**2)**0.5
 ```
@@ -313,7 +346,7 @@ kennzeichen wir die prognostizierten maximalen Kräfte.
 import plotly.express as px 
 
 fig = px.scatter( eingabedaten, x='Zellengroesse', y='Fuellgrad', color=ausgabedaten,
-    title='Gestörte Daten um ausgewähltes Beispiel (3, 0.3)', 
+    title='Variierte Eingabedaten und dazugehörige Prognosen', 
     labels={'color': 'maximale Kraft [N]'}
 )
 fig.update_xaxes(range=[2.7, 3.3])
