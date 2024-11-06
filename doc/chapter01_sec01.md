@@ -258,7 +258,7 @@ variation_fuellgrad = 0.3 + np.random.normal(0, 0.1, N)
 ```
 
 Wir überprüfen visuell mit einem Streudiagramm (Scatterplot), ob die variierten
-Eingabedaten im zulässigen Bereich liegen. Die Zellengröße muss ja zischen 2 und
+Eingabedaten im zulässigen Bereich liegen. Die Zellengröße muss ja zwischen 2 und
 10 mm liegen, der Füllgrad im Intervall [0,1]. Dazu importieren wir das Modul
 `Plotly Express` als `px`. Der Scatterplot wird durch die Funktion `scatter()`
 erzeugt. Auf der x-Achse tragen wir mit `x=ariation_zellengroesse` die
@@ -302,9 +302,9 @@ ausgabedaten = ki_modell.predict(eingabedaten)
 
 Für das LIME-Verfahren ist es wichtig, dass die variierte Eingabedaten gewichtet
 werden. Je ähnlicher ein Datenpunkt zum ausgewählten Beispiel ist, desto mehr
-Gewicht soll dieser Datenpunkt beim Training des Ersatzmodells sein. In diesem
-Beispiel verwenden wir den euklidischen Abstand, um die Ähnlichkeit zu
-berechnen.
+Gewicht soll dieser Datenpunkt beim Training des Ersatzmodells haben. In diesem
+Beispiel verwenden wir den euklidischen Abstand, um die Ähnlichkeit der
+Eingabedaten zur Referenz zu berechnen.
 
 ```{figure} pics/variierte_eingabedaten_annotated.svg
 :alt: Euklidischer Abstand zur Referenz
@@ -321,11 +321,29 @@ Damit ergibt sich der folgende Python-Code zur Berechnung der Abstände.
 abstaende = ((eingabedaten['Zellengroesse'] - 3.0)**2 + (eingabedaten['Fuellgrad'] - 0.3)**2)**0.5
 ```
 
-Das Gewicht soll 1 sein, wenn der Abstand zum ausgewählten Beispiel 0 ist. Ein
-schneller Check der gestörten Eingabedaten zeigt, dass der maximale Abstand der
-Eingabedaten zum Referenzbeispiel kleiner als 0.5 ist. Für einen Abstand von 0.5
-fordern wir ein Gewicht von 0. Dazwischen sollen die Gewichte linear abfallen.
-Der folgende Code erfüllt diese Forderungen:
+Wie die Gewichte nun basierend auf der Ähnlichkeit der Eingabedaten zur Referenz
+gewählt werden, wird in der Forschung intensiv diskutiert. Häufig werden
+exponentielle Gewichte gewählt. Wir nehmen hier Gewichte, die linear vom Abstand
+der Eingabedaten zur Referenz abhängen. Das Gewicht soll 1 sein, wenn der
+Abstand zum ausgewählten Beispiel 0 ist. Ein schneller Check der gestörten
+Eingabedaten zeigt, dass der maximale Abstand der Eingabedaten zum
+Referenzbeispiel kleiner als 0.5 ist. Für einen Abstand von 0.5 fordern wir ein
+Gewicht von 0. Dazwischen sollen die Gewichte linear abfallen.
+
+```{figure} pics/gewichtsfunktionen.svg
+:alt: Gewichtsfunktionen
+:align: center
+:name: gewichtsfunktionen
+
+Mögliche Gewichtsfunktionen: links eine lineare Gewichtsfunktion, die so
+parametriert wurde, dass ein Abstand $r=0$ zu einem Gewicht von Eins führt und
+ab $r=0.5$ Null ist. Die rechte exponentielle Gewichtsfunktion ist ähnlich zur
+linearen Gewichtsfunktion, bietet aber den zusätzlichen Vorteil, differenzierbar
+zu sein.
+(Quelle: eigene Darstellung)
+```
+
+Mit dem folgenden Code implementieren wir die lineare Gewichtsfunktion.
 
 ```{code-cell}
 gewichte = -2 * abstaende + 1
@@ -356,7 +374,21 @@ fig.show()
 ```
 
 Scheinbar ist vor allem der Füllgrad entscheidend für die Prognose der maximalen
-Kraft. Wir entscheiden uns für ein lineares Regressionsmodell, das wir zunächst
+Kraft. Wir visualisieren daher die Prognosen der maximalen Kräfte abhängig vom
+Füllgrad.
+
+```{code-cell}
+import plotly.express as px 
+
+fig = px.scatter(eingabedaten, x='Fuellgrad', y=ausgabedaten, color=ausgabedaten,
+    title='Prognostizierte maximale Kraft abhängig vom Füllgrad', 
+    labels={'color': 'maximale Kraft [N]', 'y': 'maximale Kraft[N]'}
+)
+
+fig.show()
+```
+
+Wir entscheiden uns für ein lineares Regressionsmodell, das wir zunächst
 aus dem Modul Scikit-Learn importieren. Dann trainieren wir das lineare
 Regressionsmodell mit den Eingabe- und Ausgabedaten (wir verzichten auf eine
 Skalierung der Daten, da diese in derselben Größenordnung liegen und lassen auch
