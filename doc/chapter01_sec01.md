@@ -102,7 +102,19 @@ help(ki_modell)
 Die Hilfe gibt Auskunft darüber, wie das Schuheinlagen-Orakel verwendet werden
 kann. Das KI-Modell liefert Prognosen zur maximalen Kraft, die ein Bauteil
 aushalten kann, basierend auf den Eingabemerkmalen Zellenform, Zellengröße und
-Füllgrad. Laut Dokumentation ist die Zellenform entweder `1` für eine X-Zelle
+Füllgrad. Die Messung der maximalen Kraft wird dabei durch die Be- und
+Entlastung des Bauteils bestimmt.
+
+```{figure} ./pics/messung.mp4
+:alt: Video der Be- und Entlastungsmessung
+:align: center
+:name: messung
+:width: 100%
+Video der Be- und Entlastungsmessung eines Bauteils
+(Quelle: Tim Schwitzner {cite}`schwitzner:2024`).
+```
+
+Laut Dokumentation ist die Zellenform entweder `1` für eine X-Zelle
 oder `2` für einen Gyroiden. Was sich hinter diesen Fachbegriffen verbirgt,
 können nur die Ingenieure beantworten, die diesen Produktionsprozess entwickelt
 haben (siehe Abbildung 1).
@@ -117,7 +129,7 @@ Zellenform der Bauteile: links X-Zelle codiert als 1 und rechts Gyroid codiert a
 
 Darüber hinaus muss die Zellengröße zwischen $\pu{2 mm}$ und $\pu{10 mm}$
 liegen. Der Füllgrad liegt zwischen $\pu{20 \%}$ und $\pu{45 \%}$, wobei dieser
-Wert als Zahl im Intervall $[0,1]$ angegeben wird.
+Prozentwert als Fließkommazahl (Float) im Intervall $[0.2,0.45]$ angegeben wird.
 
 Um mit dem KI-Modell vertraut zu werden, lassen wir eine Prognose erstellen. Wir
 nutzen das Modul Pandas zur Verwaltung der Daten und importieren es daher in
@@ -171,7 +183,7 @@ bezeichnet.
 ```{admonition} Was ist ... ein Black-Box-Modell?
 :class: note
 Ein KI-Modell wird als Black-Box-Modell bezeichnet, wenn es keine transparente
-Entscheidungslogik oder nachvollziehbare Eingangsdaten besitzt.
+Entscheidungslogik besitzt oder die Eingangsdaten nicht nachvollziehbar sind.
 ```
 
 Das Gegenteil eines Black-Box-Modells ist das sogenannte **White-Box-Modell**.
@@ -213,7 +225,7 @@ für verschiedene KI-Modelle eingesetzt werden kann.
    gewichtet. Je ähnlicher eine Datenpunkt zur Referenz ist, desto höher ist das
    Gewicht.
 4. *Training eines Ersatzmodells*: Wir trainieren ein einfaches, gut
-   interpretierbares Ersatzmodell (z.B. ein linares Regressionsmodell oder einen
+   interpretierbares Ersatzmodell (z.B. ein lineares Regressionsmodell oder einen
    Entscheidungsbaum) auf den gewichteten, leicht abgeänderten Eingabedaten. Die
    Prognosen des ursprünglichen Modells sind dabei die Ausgabedaten.
 5. *Erklärung der Prognose*: Da das Ersatzmodell aus Schritt 4 ein
@@ -253,19 +265,23 @@ und zum Füllgrad 0.3:
 ```{code-cell}
 np.random.seed(42) 
 
-variation_zellengroesse = 3.0 + np.random.normal(0, 0.1, N)
-variation_fuellgrad = 0.3 + np.random.normal(0, 0.1, N)
+variation_zellengroesse = 3.0 + np.random.normal(0, 0.5, N)
+variation_fuellgrad = 0.3 + np.random.normal(0, 0.05, N)
 ```
 
 Wir überprüfen visuell mit einem Streudiagramm (Scatterplot), ob die variierten
-Eingabedaten im zulässigen Bereich liegen. Die Zellengröße muss ja zwischen 2 und
-10 mm liegen, der Füllgrad im Intervall [0,1]. Dazu importieren wir das Modul
-`Plotly Express` als `px`. Der Scatterplot wird durch die Funktion `scatter()`
-erzeugt. Auf der x-Achse tragen wir mit `x=ariation_zellengroesse` die
-Zellengrößen ein und auf der y-Achse mit `y=variation_fuellgrad` die Füllgrade
-der variierten Bauteile. Zusätzlich setzen wir mi dem optionalen Argument
-`title=` noch einen Titel. Zuletzt ergänzen wir noch das Referenzbeispiel durch
-einen zweiten Scatterplot mit `add_scatter()`.
+Eingabedaten im zulässigen Bereich liegen. Die Zellengröße muss ja zwischen 2
+und 10 mm liegen, der Füllgrad im Intervall [0.2,0.45]. Dazu importieren wir das
+Modul `Plotly Express` als `px`. Der Scatterplot wird durch die Funktion
+`scatter()` erzeugt. Auf der x-Achse tragen wir mit `x=variation_zellengroesse`
+die Zellengrößen ein und auf der y-Achse mit `y=variation_fuellgrad` die
+Füllgrade der variierten Bauteile. Zusätzlich setzen wir mit dem optionalen
+Argument `title=` noch einen Titel. Zuletzt ergänzen wir noch das
+Referenzbeispiel durch einen zweiten Scatterplot mit `add_scatter()`. Insgesamt
+fixieren wir den Ausschnitt für die x-Achse auf [1.5, 4.5] und für die y-Achse
+auf [0.15, 0.45] mit `fig.update_layout(xaxis_range=[1.5, 4.5],
+yaxis_range=[0.15,0.45])`, damit das Referenzbeispiel im Zentrum des Diagramms
+liegt.
 
 ```{code-cell}
 import plotly.express as px 
@@ -274,6 +290,7 @@ fig = px.scatter(x=variation_zellengroesse, y=variation_fuellgrad,
     title='Variierte Eingabedaten um ausgewähltes Referenzbeispiel (3, 0.3)'
 )
 fig.add_scatter(x=[3.0], y=[0.3], name='Referenz')
+fig.update_layout(xaxis_range=[1.5, 4.5], yaxis_range=[0.15,0.45])
 
 fig.show()
 ```
@@ -327,7 +344,7 @@ exponentielle Gewichte gewählt. Wir nehmen hier Gewichte, die linear vom Abstan
 der Eingabedaten zur Referenz abhängen. Das Gewicht soll 1 sein, wenn der
 Abstand zum ausgewählten Beispiel 0 ist. Ein schneller Check der gestörten
 Eingabedaten zeigt, dass der maximale Abstand der Eingabedaten zum
-Referenzbeispiel kleiner als 0.5 ist. Für einen Abstand von 0.5 fordern wir ein
+Referenzbeispiel kleiner als 1.5 ist. Für einen Abstand von 1.5 fordern wir ein
 Gewicht von 0. Dazwischen sollen die Gewichte linear abfallen.
 
 ```{figure} pics/gewichtsfunktionen.svg
@@ -337,7 +354,7 @@ Gewicht von 0. Dazwischen sollen die Gewichte linear abfallen.
 
 Mögliche Gewichtsfunktionen: links eine lineare Gewichtsfunktion, die so
 parametriert wurde, dass ein Abstand $r=0$ zu einem Gewicht von Eins führt und
-ab $r=0.5$ Null ist. Die rechte exponentielle Gewichtsfunktion ist ähnlich zur
+ab $r=1.5$ Null ist. Die rechte exponentielle Gewichtsfunktion ist ähnlich zur
 linearen Gewichtsfunktion, bietet aber den zusätzlichen Vorteil, differenzierbar
 zu sein.
 (Quelle: eigene Darstellung)
@@ -346,7 +363,7 @@ zu sein.
 Mit dem folgenden Code implementieren wir die lineare Gewichtsfunktion.
 
 ```{code-cell}
-gewichte = -2 * abstaende + 1
+gewichte = -2/3 * abstaende + 1
 ```
 
 ### Schritt 4: Training eines Ersatzmodells
@@ -355,20 +372,16 @@ Häufig wird ein lineares Regressionsmodell oder ein Entscheidungsbaum verwendet
 um ein lokal interpretierbares Modell zu erzeugen, dass das ursprüngliche
 KI-Modell erklärt. Wir werfen mit Hilfe eines Streudiagramms (Scatterplot) einen
 kurzen Blick auf die variierten Eingabedaten und die vom KI-Modell
-prognostizierten Ausgabedaten (maximale Kräfte). Wir importieren das Modul
-`Plotly Express` als `px`. Auf der x-Achse tragen wir die Zellengrößen ein und
-auf der y-Achse die Füllgrade der variierten Bauteile. Durch die Farbe
-kennzeichen wir die prognostizierten maximalen Kräfte.
+prognostizierten Ausgabedaten (maximale Kräfte). Auf der x-Achse tragen wir die
+Zellengrößen ein und auf der y-Achse die Füllgrade der variierten Bauteile.
+Durch die Farbe kennzeichen wir die prognostizierten maximalen Kräfte.
 
 ```{code-cell}
-import plotly.express as px 
-
 fig = px.scatter( eingabedaten, x='Zellengroesse', y='Fuellgrad', color=ausgabedaten,
     title='Variierte Eingabedaten und dazugehörige Prognosen', 
     labels={'color': 'maximale Kraft [N]'}
 )
-fig.update_xaxes(range=[2.7, 3.3])
-fig.update_yaxes(range=[0.0, 0.6])
+fig.update_layout(xaxis_range=[1.5, 4.5], yaxis_range=[0.15,0.45])
 
 fig.show()
 ```
@@ -380,20 +393,66 @@ Füllgrad.
 ```{code-cell}
 import plotly.express as px 
 
-fig = px.scatter(eingabedaten, x='Fuellgrad', y=ausgabedaten, color=ausgabedaten,
+fig = px.scatter(eingabedaten, x='Fuellgrad', y=ausgabedaten,
     title='Prognostizierte maximale Kraft abhängig vom Füllgrad', 
-    labels={'color': 'maximale Kraft [N]', 'y': 'maximale Kraft[N]'}
+    labels={'y': 'maximale Kraft[N]'}
 )
 
 fig.show()
 ```
 
-Wir entscheiden uns für ein lineares Regressionsmodell, das wir zunächst
-aus dem Modul Scikit-Learn importieren. Dann trainieren wir das lineare
-Regressionsmodell mit den Eingabe- und Ausgabedaten (wir verzichten auf eine
+Wir wählen als White-Box-Modell ein lineares Regressionsmodell, das lokal eine
+gut interpretierbare Erklärung liefern soll. Dabei beschränken wir uns zunächst
+auf den Füllgrad als Ursache $x$ und die maximale Kraft (in Newton) als Wirkung
+$y$. Wir suchen also Parameter $w$ (Steigung) und $b$ (y-Achsenabschnitt), so
+dass die lineare Funktion
+
+$$y = w\cdot x + b$$
+
+möglichst gut die Punkte trifft. Wie gut die maximalen Kräfte basierend auf dem
+Füllgrad durch die Gerade angenähert werden, bewertet das sogenannte
+R²-Bestimmtheitsmaß (siehe [Wikipedia →
+Bestimmtheitsmaß](https://de.wikipedia.org/wiki/Bestimmtheitsmaß)).
+Normalerweise liegt das R²-Bestimmtheitsmaß zwischen 0 und 1, wobei ein Wert von
+Eins perfekt wäre, aber es kann auch negativ werden.
+
+```{admonition} Interaktive Bestimmung des linearen Regressionsmodells
+:class: miniexercise
+
+Probieren Sie aus, für welche Steigung $w$ und für welchen y-Achsenabschnitt $b$
+die lineare Regressionsgerade am besten die Datenpunkte annähert. Das
+R²-Bestimmtheitsmaß wird dabei im Titel angezeigt und sollte möglichst nahe 1 sein.
+
+<iframe src="_static/test.html" width=100% height="600" frameborder="0" scrolling="yes"></iframe>
+```
+
+Lineare Regressionsmodelle sind nicht darauf beschränkt, nur *ein* Merkmal als
+Ursache zu betrachten. Wir können auch ein sogenanntes multiples lineares
+Regressionsmodell benutzen, bei dem die drei Merkmale Zellenform $x_0$,
+Zellengröße $x_1$ und Füllgrad $x_2$ linear kombiniert werden, um die maximale
+Kraft $y$ zu prognostizieren:
+
+$$y = w_0\cdot x_0 + w_1\cdot x_1 + w_2\cdot x_2 + b.$$
+
+Bei drei Merkmalen haben wir nicht nur die Steigung (für den Füllgrad), sondern
+auch die Steigungen für die Zellenform und die Zellengröße. Üblicherweise werden
+diese Koeffizienten Gewichte (englisch weight) genannt und mit $w_0$, $w_1$ und
+$w_2$ abgekürzt.
+
+Die Bestimmung der bestmöglichen Gewichte $w_0$, $w_1$, $w_2$ und $b$ überlassen
+wir diesmal dem Modul Scikit-Learn.
+[Scikit-Learn](https://scikit-learn.org/stable/index.html) ist eine bekanntesten
+Bibliotheken für das maschinelle Lernen und beinhaltet auch lineare
+Regressionsmodelle. Die linearen Regressionsmodelle sind dabei in einem
+Untermodul namens `sklearn.linear_model` gesammelt. Daraus importieren wir das
+lineare Regressionsmodell `LinearRegression` und instanziieren es als `modell`.
+Dann trainieren wir das lineare Regressionsmodell mit den Eingabe- und
+Ausgabedaten und benutzen dafür die die `fit()`-Methode. Wir verzichten auf eine
 Skalierung der Daten, da diese in derselben Größenordnung liegen und lassen auch
-den üblichen Split in Trainings- und Testdaten weg). Dafür geben wir über das
-optionale Argument `sample_weights` noch die Gewichte an.
+den üblichen Split in Trainings- und Testdaten weg. Stattdessen übergeben wir
+zusätzlich über das optionale Argument `sample_weights` noch die Gewichte, so
+dass die Ähnlichkeit eines Datenpunktes zur Referenz bei der Bestimmung der
+Gewichte berücksichtigt wird.
 
 ```{code-cell}
 from sklearn.linear_model import LinearRegression
@@ -409,36 +468,25 @@ score = modell.score(eingabedaten, ausgabedaten)
 print(score)
 ```
 
-Ein Score von 1 wäre perfekt, 0.87 ist sehr gut. Wir haben daher ein
-interpretierbares Ersatzmodell gefunden, das hilft, das ausgewählte Beispiel zu
+Ein Score von 1 wäre perfekt, ungefähr 0.89 ist sehr gut. Wir haben daher ein
+White-Box-Ersatzmodell gefunden, das hilft, das ausgewählte Beispiel zu
 interpretieren.
 
 ### Schritt 5: Erklärung der Prognose
 
-Lineare Regressionsmodelle sind leicht verständlich und gut interpretierbar.
-Wenn $x_0$ für die Zellenform steht, $x_1$ für die Zellengröße und $x_2$ für den
-Füllgrad, dann wird die maximale Kraft $y$ bei einem linearen Regressionsmodell
-als
+Als nächstes lassen wir uns die Gewichte $w_0, w_1$ und $w_2$ und den
+y-Achsenabschnitt $b$ des linearen Regressionsmodells
 
 $$y = w_0\cdot x_0 + w_1\cdot x_1 + w_2\cdot x_2 + b$$
 
-berechnet. $w_0, w_1$ und $w_2$ sind die Koeffizienten des linearen Modells und
-$b$ die Steigung. Wir lassen uns nun die Koeffizienten des linearen
-Regressionsmodells ausgeben, das als Ersatzmodell trainiert wurde. Diese werden
-von Scikit-Learn im trainierten Modell im Attribut `coef_` gespeichert.
+ausgeben. Diese werden von Scikit-Learn im trainierten Modell im Attribut
+`coef_` gespeichert.
 
 ```{code-cell}
 print(modell.coef_)
 ```
 
-Die Zellenform spielt keine Rolle, der Koeffizient ist 0. Die Zellengröße wird
-mit ungefähr 3.8 gewichtet, der Füllgrad mit ungefähr 474.3. Der Koeffizient für
-den Füllgrad ist um eingies größer als der Koeffizient für die Zellengröße. Dies
-ist auch dann noch der Fall, wenn wir berücksichtigen, dass die Werte der
-Zellengröße 10-mal so groß sind wie der Füllgrad (wir haben die Daten nicht
-skaliert).
-
-Dazu kommt noch die Steigung, die im Attribut `intercept_` gespeichert ist.
+Dazu kommt noch der y-Achsenabschnitt $b$, der im Attribut `intercept_` gespeichert ist.
 
 ```{code-cell}
 print(modell.intercept_)
@@ -446,9 +494,19 @@ print(modell.intercept_)
 
 Insgesamt lautet das lineare Regressionsmodell also
 
-$$y = 3.8\cdot x_1 + 474.3\cdot x_2 - 97.4,$$
+$$y = 0\cdot x_0 -2.46\cdot x_1 +  635.33 \cdot x_2 - 134.79,$$
 
-wobei $x_1$ die Zellengröße in Millimetern und $x_2$ der Füllgrad ist.
+wobei $y$ die maximale Kraft in Newton bezeichnet, $x_0$ die Zellenform, $x_1$
+die Zellengröße und $x_2$ den Füllgrad. Das Gewicht für die Zellenform ist $0$,
+sie spielt bei unsererm Erklärmodell keine Rolle. Wir haben die Zellenform auch
+nicht variiert. Die Zellengröße hat einen leicht negativen Effekt, denn
+$w_1\approx -2.46$. Der deutlich wichtigere Effekt ist jedoch der Füllgrad
+($w_2\approx 635.33$). Selbst wenn wir berücksichtigen, dass die Füllgrade aus
+dem Intervall $[0.2, 0.45]$ Faktor 10 kleiner sind als die Zellengrößen aus dem
+Intervall $[2, 8]$, ist $w_2$ um einiges gewichtiger als $w_1$ und hat einen
+positiven Effekt. Je höher der Füllgrad ist, desto höher ist die prognostizierte
+maximale Kraft. Damit können wir Ingenieurinnen und Ingenieuren Hinweise geben,
+wie die Bauteile für die Schuheinlage designt werden sollten.
 
 ## Kategorien der erklärbaren KI-Modelle
 
