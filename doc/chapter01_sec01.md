@@ -506,16 +506,44 @@ dem Intervall $[0.2, 0.45]$ Faktor 10 kleiner sind als die Zellengrößen aus de
 Intervall $[2, 8]$, ist $w_2$ um einiges gewichtiger als $w_1$ und hat einen
 positiven Effekt. Je höher der Füllgrad ist, desto höher ist die prognostizierte
 maximale Kraft. Damit können wir Ingenieurinnen und Ingenieuren Hinweise geben,
-wie die Bauteile für die Schuheinlage designt werden sollten.
+wie die Bauteile für die Schuheinlage konstruiert werden sollten.
 
 ## Kategorien der erklärbaren KI-Modelle
 
-TODO
+Bei dem obigen Beispiel des Schuheinlagen-Orakels haben wir die LIME-Methode
+benutzt, um das KI-Modell zu erklären. LIME steht dabei für »Local Interpretable
+Model-agnostic Explanations«. Allein diese Begrifflichkeiten deuten schon an,
+dass es viele verschiedene Möglichkeiten gibt, KI-Modelle zu erklären.
+Beispielsweise werden Erklärkonzepte nach ihrem **Umfang** unterschieden. **Lokale
+Modelle** erklären, wie die Entscheidungslogik des KI-Modells für ein einzelnes
+Beispiel zustandekommt und was für Datenpunkte in der unmittelbaren
+Nachbarschaft prognostiziert werden würde. Dem gegenüber stehen **globale
+Modelle**, die einen Einblick in die Gesamtstruktur und Funktionsweise eines
+KI-Modells geben.
 
-* Komplexität (intrinsische Modelle oder Post-hoc-Methoden),
-* Umfang (global oder lokal) und
-* Modellabhängigkeit (modellspezifisch oder modellagnostisch)
+Ein weiteres Unterscheidungsmerkmal von erklärbaren KI-Modellen ist die
+**Modellabhängigkeit**. Funktioniert die Methode für jedes KI-Modell, ist das
+erklärbare KI-Modell als unabhängig vom Originalmodell, so nennt man die Methode
+**modellagnostisch**. Das Gegenteil von modellagnostisch ist
+**modellspezifisch**. Bei modellspezifischen Methoden ist die Erklärmethode auf
+ein bestimmtes KI-Modell zugeschnitten. Ein typischer Vertreter dieser Kategorie
+ist die Analyse der sogenannten Feature Importance bei Random Forests.
+
+Es gibt noch einige weitere Unterscheidungsmerkmale. In diesem Kapitel gehen wir
+noch auf die **Komplexität** ein, bei der zwischen **intrinsischen** Modellen
+und **Post-hoc-Methoden** unterschieden wird. Intrinsische Modelle sind von sich
+aus interpretierbar  wie biespielsweise die lineare Regression oder
+Entscheidungsbäume. Dahingegen werden Post-hoc-Modelle nachträglich auf
+KI-Modelle angewendet, so wie wir im obigen Beispiel die Post-hoc-Methode LIME
+eingesetzt haben, um die Funktionsweise des Schuheinlagen-Orakels im Nachhinein
+zu erklären. Eine weitere sehr bekannte Post-hoc-Methode ist das **SHAP**-Verfahren.
 
 ## Zusammenfassung und Ausblick
 
-TODO
+In diesem Kapitel haben wir die Erklärbarkeit von KI-Modellen untersucht. Nach
+einer Einführung in die Relevanz des Themas haben wir das populäre
+Post-hoc-Verfahren LIME kennengelernt, das universell einsetzbar ist und die
+Entscheidungslogik für einzelne Referenzbeispiele lokal interpretieren kann.
+Außerdem haben wir wichtige Kategorien der Erklärbarkeit von KI-Modellen
+betrachtet. Im nächsten Kapitel würden wir uns mit dem SHAP-Verfahren
+beschäftigen.
