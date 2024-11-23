@@ -3,7 +3,7 @@
 
 title: Erklärbare KI
 author: Simone Gramsch
-logo: logo.webp
+logo: pics/logo.webp
 # source: DALL·E 2024-10-24 12.07.43 - A visual representation of explainable AI, 
 # showing a transparent neural network with layers of interconnected nodes, 
 # highlighted to show how each laye
@@ -32,7 +32,6 @@ repository:
 launch_buttons:
   notebook_interface: "jupyterlab"
   colab_url: "https://colab.research.google.com"
-  jupyterhub_url: "https://gramschs.github.io/demo/"  
   binderhub_url: "https://mybinder.org" 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
