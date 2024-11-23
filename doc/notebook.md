@@ -87,6 +87,8 @@ Spaßeshalber nennen wir dieses KI-Modell **Schuheinlagen-Orakel**.
 
 ```{code-cell} ipython
 :tags: ["remove-input"]
+# !pip install pandas
+# !pip install scikit-learn
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor 
 
@@ -295,6 +297,7 @@ eine Liste mit `N` Einsen. Etwas einfacher wird es, wenn wir dazu die Funktion
 importieren.
 
 ```{code-cell} ipython3
+# !pip install numpy
 import numpy as np
 
 N = 100
@@ -330,6 +333,7 @@ yaxis_range=[0.15,0.45])`, damit das Referenzbeispiel im Zentrum des Diagramms
 liegt.
 
 ```{code-cell} ipython3
+# !pip install plotly
 import plotly.express as px 
 
 fig = px.scatter(x=variation_zellengroesse, y=variation_fuellgrad,
@@ -437,8 +441,6 @@ Kraft. Wir visualisieren daher die Prognosen der maximalen Kräfte abhängig vom
 Füllgrad.
 
 ```{code-cell} ipython3
-import plotly.express as px 
-
 fig = px.scatter(eingabedaten, x='Fuellgrad', y=ausgabedaten,
     title='Prognostizierte maximale Kraft abhängig vom Füllgrad', 
     labels={'y': 'maximale Kraft[N]'}
