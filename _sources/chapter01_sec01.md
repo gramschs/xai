@@ -1,12 +1,13 @@
 ---
 jupytext:
+  formats: ipynb,md:myst
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: python311
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -86,16 +87,17 @@ Spaßeshalber nennen wir dieses KI-Modell **Schuheinlagen-Orakel**, denn leider
 liegt es nur binär vor. Daher müssen wir auch das Modul `dill` benutzen, um es
 zu laden.
 
-```{code-cell}
+```{code-cell} ipython3
 import dill
-with open('schuheinlagen_orakel.dill', 'rb') as f:
+url = 'https://gramschs.github.io/xai/schuheinlagen_orakel.dill'
+with open(url, 'rb') as f:
     ki_modell = dill.load(f)
 ```
 
 Als nächstes benutzen wir die eingebaute Hilfe des KI-Systems, um mehr über das
 Schuheinlagen-Orakel zu erfahren.
 
-```{code-cell}
+```{code-cell} ipython3
 help(ki_modell)
 ```
 
@@ -142,7 +144,7 @@ wenn nur ein Bauteil betrachtet wird, ist eine Liste aufgrund der Syntax
 erforderlich. Zuletzt lassen wir uns die initialisierte Datenstruktur mit der
 Pandas-Methode `.head()` anzeigen.
 
-```{code-cell}
+```{code-cell} ipython3
 import pandas as pd 
 
 bauteil = pd.DataFrame({
@@ -158,7 +160,7 @@ Nun können wir die `predict()`-Methode nutzen, um die maximale Kraft
 prognostizieren zu lassen. Wir speichern das Ergebnis in der Variablen
 `maximale_kraft`.
 
-```{code-cell}
+```{code-cell} ipython3
 maximale_kraft = ki_modell.predict(bauteil)
 print(maximale_kraft)
 ```
@@ -248,7 +250,7 @@ eine Liste mit `N` Einsen. Etwas einfacher wird es, wenn wir dazu die Funktion
 `np.ones()` des Moduls `NumPy` nutzen, das wir mit der üblichen Abkürzung `np`
 importieren.
 
-```{code-cell}
+```{code-cell} ipython3
 import numpy as np
 
 N = 100
@@ -262,7 +264,7 @@ Funktion `np.random.normal()` normalverteilte Zufallszahlen (mit Mittelwert 0
 und Standardabweichung 0.1) und addieren diese Zufallszahlen zur Zellengröße 3
 und zum Füllgrad 0.3:
 
-```{code-cell}
+```{code-cell} ipython3
 np.random.seed(42) 
 
 variation_zellengroesse = 3.0 + np.random.normal(0, 0.5, N)
@@ -283,7 +285,7 @@ auf [0.15, 0.45] mit `fig.update_layout(xaxis_range=[1.5, 4.5],
 yaxis_range=[0.15,0.45])`, damit das Referenzbeispiel im Zentrum des Diagramms
 liegt.
 
-```{code-cell}
+```{code-cell} ipython3
 import plotly.express as px 
 
 fig = px.scatter(x=variation_zellengroesse, y=variation_fuellgrad,
@@ -298,7 +300,7 @@ fig.show()
 Auf diese Weise erhalten wir die variierten Eingabedaten, die wir anschließend
 in einem Pandas-DataFrame zusammenfassen:
 
-```{code-cell}
+```{code-cell} ipython3
 eingabedaten = pd.DataFrame({
     'Zellenform': variation_zellenform,
     'Zellengroesse': variation_zellengroesse,
@@ -311,7 +313,7 @@ eingabedaten = pd.DataFrame({
 Die Prognosen des ursprünglichen KI-Modells lassen sich einfach mit der
 `predict()`-Methode berechnen.
 
-```{code-cell}
+```{code-cell} ipython3
 ausgabedaten = ki_modell.predict(eingabedaten)
 ```
 
@@ -334,7 +336,7 @@ als $r=\sqrt{(\Delta x)^2 + (\Delta y)^2}$ berechnet werden.
 
 Damit ergibt sich der folgende Python-Code zur Berechnung der Abstände.
 
-```{code-cell}
+```{code-cell} ipython3
 abstaende = ((eingabedaten['Zellengroesse'] - 3.0)**2 + (eingabedaten['Fuellgrad'] - 0.3)**2)**0.5
 ```
 
@@ -362,7 +364,7 @@ zu sein.
 
 Mit dem folgenden Code implementieren wir die lineare Gewichtsfunktion.
 
-```{code-cell}
+```{code-cell} ipython3
 gewichte = -2/3 * abstaende + 1
 ```
 
@@ -376,7 +378,7 @@ prognostizierten Ausgabedaten (maximale Kräfte). Auf der x-Achse tragen wir die
 Zellengrößen ein und auf der y-Achse die Füllgrade der variierten Bauteile.
 Durch die Farbe kennzeichen wir die prognostizierten maximalen Kräfte.
 
-```{code-cell}
+```{code-cell} ipython3
 fig = px.scatter( eingabedaten, x='Zellengroesse', y='Fuellgrad', color=ausgabedaten,
     title='Variierte Eingabedaten und dazugehörige Prognosen', 
     labels={'color': 'maximale Kraft [N]'}
@@ -390,7 +392,7 @@ Scheinbar ist vor allem der Füllgrad entscheidend für die Prognose der maximal
 Kraft. Wir visualisieren daher die Prognosen der maximalen Kräfte abhängig vom
 Füllgrad.
 
-```{code-cell}
+```{code-cell} ipython3
 import plotly.express as px 
 
 fig = px.scatter(eingabedaten, x='Fuellgrad', y=ausgabedaten,
@@ -423,7 +425,7 @@ Probieren Sie aus, für welche Steigung $w$ und für welchen y-Achsenabschnitt $
 die lineare Regressionsgerade am besten die Datenpunkte annähert. Das
 R²-Bestimmtheitsmaß wird dabei im Titel angezeigt und sollte möglichst nahe 1 sein.
 
-<iframe src="_static/test.html" width=100% height="600" frameborder="0" scrolling="yes"></iframe>
+<iframe src="_static/linear_regression.html" width=100% height="600" frameborder="0" scrolling="yes"></iframe>
 ```
 
 Lineare Regressionsmodelle sind nicht darauf beschränkt, nur *ein* Merkmal als
@@ -454,7 +456,7 @@ zusätzlich über das optionale Argument `sample_weights` noch die Gewichte, so
 dass die Ähnlichkeit eines Datenpunktes zur Referenz bei der Bestimmung der
 Gewichte berücksichtigt wird.
 
-```{code-cell}
+```{code-cell} ipython3
 from sklearn.linear_model import LinearRegression
 
 modell = LinearRegression()
@@ -463,7 +465,7 @@ modell.fit(eingabedaten, ausgabedaten, sample_weight=gewichte)
 
 Mithilfe der `score()`-Methode lassen wir die Qualität des Modells bestimmen:
 
-```{code-cell}
+```{code-cell} ipython3
 score = modell.score(eingabedaten, ausgabedaten)
 print(score)
 ```
@@ -482,13 +484,13 @@ $$y = w_0\cdot x_0 + w_1\cdot x_1 + w_2\cdot x_2 + b$$
 ausgeben. Diese werden von Scikit-Learn im trainierten Modell im Attribut
 `coef_` gespeichert.
 
-```{code-cell}
+```{code-cell} ipython3
 print(modell.coef_)
 ```
 
 Dazu kommt noch der y-Achsenabschnitt $b$, der im Attribut `intercept_` gespeichert ist.
 
-```{code-cell}
+```{code-cell} ipython3
 print(modell.intercept_)
 ```
 
