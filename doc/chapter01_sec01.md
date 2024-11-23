@@ -89,8 +89,7 @@ zu laden.
 
 ```{code-cell} ipython3
 import dill
-url = 'https://gramschs.github.io/xai/extra/schuheinlagen_orakel.dill'
-with open(url, 'rb') as f:
+with open('schuheinlagen_orakel.dill', 'rb') as f:
     ki_modell = dill.load(f)
 ```
 
@@ -425,7 +424,7 @@ Probieren Sie aus, für welche Steigung $w$ und für welchen y-Achsenabschnitt $
 die lineare Regressionsgerade am besten die Datenpunkte annähert. Das
 R²-Bestimmtheitsmaß wird dabei im Titel angezeigt und sollte möglichst nahe 1 sein.
 
-<iframe src="https://gramschs.github.io/xai/extra/linear_regression.html"
+<iframe src="https://gramschs.github.io/xai/_static/extra/linear_regression.html"
 width=100% height="600" frameborder="0" scrolling="yes"></iframe>
 ```
 
