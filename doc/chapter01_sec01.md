@@ -88,6 +88,7 @@ liegt es nur binär vor. Daher müssen wir auch das Modul `dill` benutzen, um es
 zu laden.
 
 ```{code-cell} ipython3
+# !pip install dill
 import dill
 with open('schuheinlagen_orakel.dill', 'rb') as f:
     ki_modell = dill.load(f)
