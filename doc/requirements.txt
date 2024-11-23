@@ -5,3 +5,4 @@ pandas
 dill
 plotly
 sklearn
+jupyterlab_myst
