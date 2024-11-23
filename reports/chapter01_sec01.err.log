@@ -23,7 +23,7 @@ Traceback (most recent call last):
 nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
 ------------------
 import dill
-url = 'https://gramschs.github.io/xai/schuheinlagen_orakel.dill'
+url = 'https://gramschs.github.io/xai/extra/schuheinlagen_orakel.dill'
 with open(url, 'rb') as f:
     ki_modell = dill.load(f)
 ------------------
@@ -33,7 +33,7 @@ with open(url, 'rb') as f:
 [0;31mFileNotFoundError[0m                         Traceback (most recent call last)
 Cell [0;32mIn[1], line 3[0m
 [1;32m      1[0m [38;5;28;01mimport[39;00m [38;5;21;01mdill[39;00m
-[1;32m      2[0m url [38;5;241m=[39m [38;5;124m'[39m[38;5;124mhttps://gramschs.github.io/xai/schuheinlagen_orakel.dill[39m[38;5;124m'[39m
+[1;32m      2[0m url [38;5;241m=[39m [38;5;124m'[39m[38;5;124mhttps://gramschs.github.io/xai/extra/schuheinlagen_orakel.dill[39m[38;5;124m'[39m
 [0;32m----> 3[0m [38;5;28;01mwith[39;00m [38;5;28mopen[39m(url, [38;5;124m'[39m[38;5;124mrb[39m[38;5;124m'[39m) [38;5;28;01mas[39;00m f:
 [1;32m      4[0m     ki_modell [38;5;241m=[39m dill[38;5;241m.[39mload(f)
 
@@ -46,5 +46,5 @@ File [0;32m/opt/homebrew/Caskroom/miniconda/base/envs/python311/lib/python3.11/
 [1;32m    322[0m     )
 [0;32m--> 324[0m [38;5;28;01mreturn[39;00m io_open(file, [38;5;241m*[39margs, [38;5;241m*[39m[38;5;241m*[39mkwargs)
 
-[0;31mFileNotFoundError[0m: [Errno 2] No such file or directory: 'https://gramschs.github.io/xai/schuheinlagen_orakel.dill'
+[0;31mFileNotFoundError[0m: [Errno 2] No such file or directory: 'https://gramschs.github.io/xai/extra/schuheinlagen_orakel.dill'
 
