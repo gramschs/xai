@@ -83,15 +83,59 @@ KI-Modell, das die maximale Kraft (in Newton) prognostiziert, mit der eine
 3D-gedruckte Gitterstruktur belastet werden kann. Aus diesen 3D-Bauteilen werden
 dann die Schuheinlagen zusammengesetzt.
 
-Spaßeshalber nennen wir dieses KI-Modell **Schuheinlagen-Orakel**, denn leider
-liegt es nur binär vor. Daher müssen wir auch das Modul `dill` benutzen, um es
-zu laden.
+Spaßeshalber nennen wir dieses KI-Modell **Schuheinlagen-Orakel**.
+
+```{code-cell} ipython
+:tags: ["remove-input"]
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor 
+
+class SchuheinlagenOrakel:
+    """Dies ist das Schuheinlagen-Orakel. Das Orakel ist ein KI-System,
+    das die Produktion von personalisierten Schuheinlagen unterstützt.
+    Die einzige Methode, die das KI-System zur Verfügung stellt, ist die
+    Prognose .predict(). Mehr Details: help(modell.predict)
+
+    Beispiel:
+
+    import pandas as pd 
+
+    bauteile = pd.DataFrame({
+        'Zellenform': [1, 1],
+        'Zellengroesse': [3.0, 3.3],
+        'Fuellgrad': [0.3, 0.38]
+    })
+    maximale_kraft = modell.predict(X)
+    """
+
+    def __init__(self):
+        """"""
+        url = 'https://raw.githubusercontent.com/gramschs/demo/refs/heads/main/content/data/messungen.csv'
+        data = pd.read_csv(url)
+
+        rfr = RandomForestRegressor(max_depth=8, random_state=42, min_samples_leaf=1)
+        rfr.fit(data[['Zellenform', 'Zellengroesse', 'Fuellgrad']], data['Maximale Kraft'])
+        self.model = rfr
+    
+    def predict(self, X):
+        """ Prognostiziert die maximale Kraft, die von dem Bauteil aufgenommen werden kann.
+
+        Argument X:
+            Pandas DataFrame: Beschreibung der Eigenschaften des Bauteils.
+
+            Die Spalten des Pandas DataFrames beinhalten 
+            * 'Zellenform': Integer 1 für X-Zelle und 2 für Gyroid
+            * 'Zellengroesse': Float im Intervall [2, 10] in Millimetern
+            * 'Fuellgrad': Float im Intervall [0.1, 0.45]
+
+        Rückgabewert:
+            float: prognostizierte maximale Kraft in Newton
+        """
+        return self.model.predict(X)
+```
 
 ```{code-cell} ipython3
-# !pip install dill
-import dill
-with open('schuheinlagen_orakel.dill', 'rb') as f:
-    ki_modell = dill.load(f)
+ki_modell = SchuheinlagenOrakel()
 ```
 
 Als nächstes benutzen wir die eingebaute Hilfe des KI-Systems, um mehr über das
