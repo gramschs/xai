@@ -4,6 +4,6 @@
 format: jb-book
 root: intro
 chapters:
-- file: chapter01_sec01.md
+- file: notebook.md
 - file: appendix.md
 
