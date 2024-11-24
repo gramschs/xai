@@ -587,6 +587,32 @@ KI-Modelle angewendet, so wie wir im obigen Beispiel die Post-hoc-Methode LIME
 eingesetzt haben, um die Funktionsweise des Schuheinlagen-Orakels im Nachhinein
 zu erklären. Eine weitere sehr bekannte Post-hoc-Methode ist das **SHAP**-Verfahren.
 
+## Weiteres Lernmaterial zur Vertiefung
+
+Das Bundesministerium für Wirtschaft und Energie hat 2021 eine Studie
+[Erklärbare
+KI](https://www.digitale-technologien.de/DT/Redaktion/DE/Downloads/Publikation/KI-Inno/2021/Studie_Erklaerbare_KI.pdf?__blob=publicationFile&v=9)
+herausgegeben, in der insbesondere auf Seite 5 eine »Orientierungshilfe für den Einsatz der
+gängigsten Strategien und Werkzeuge für erklärbare KI (XAI-Tools)« dargestellt
+wird. Darüber hinaus werden die wichtigsten Begriffe rund um das Thema »Erklärbarkeit von KI-Modellen« eingeführt.
+
+Florian Rottach hat unter seinem Alias DeepFindr die empfehlenswerte Playlist
+»Explainable AI explained!« auf YouTube veröffentlicht. Das folgende Video aus
+dieser Reihe erklärt LIME.
+
+```{dropdown} Video "LIME" von DeepFindr
+<iframe width="560" height="315" src="https://www.youtube.com/embed/d6j6bofhj2M?si=HZa_dJFbgtnwdBqE"
+title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write;
+encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
+allowfullscreen></iframe>
+```
+
+Christoph Molnar hat ein Buch zu Erklärbarkeit von KI-Modellen geschrieben. Es
+trägt den Titel [»Interpretable Machine Learning - A Guide for Making Black Box
+Models Explainable«](https://christophm.github.io/interpretable-ml-book/), das
+LIME-Modell wird im [Kapitel
+9.2](https://christophm.github.io/interpretable-ml-book/lime.html) beschrieben.
+
 ## Zusammenfassung und Ausblick
 
 In diesem Kapitel haben wir die Erklärbarkeit von KI-Modellen untersucht. Nach
